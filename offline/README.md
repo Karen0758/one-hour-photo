@@ -4,7 +4,15 @@
 
 ## 使用方式
 
-直接用浏览器打开:
+推荐直接用浏览器打开单文件版:
+
+```text
+offline/one-hour-photo-offline.html
+```
+
+这个文件已经内嵌 CSS 和 JS,下载单个 HTML 也能打开使用。
+
+开发版文件也可以打开,但需要同目录下同时保留 `styles.css`、`storage.js`、`app.js`:
 
 ```text
 offline/index.html

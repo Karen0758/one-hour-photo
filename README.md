@@ -24,7 +24,7 @@
 offline/index.html
 ```
 
-直接用浏览器打开即可。它不需要服务器、不需要 Supabase、不需要 Netlify。
+推荐直接打开 `offline/one-hour-photo-offline.html`。这个单文件版已经内嵌 CSS 和 JS,下载一个 HTML 文件也能使用。它不需要服务器、不需要 Supabase、不需要 Netlify。
 
 ### 远程协作版
 

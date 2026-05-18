@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#FFFFFF">
+<title>一小时一张照片</title>
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+  background: #F5F5F5;
+  color: #111;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px;
+  min-height: 100vh;
+  background: #FAFAFA;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 0.5px solid rgba(0,0,0,0.08);
+}
+
+.header-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.app-header h1 {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.status {
+  font-size: 11px;
+  color: rgba(0,0,0,0.5);
+}
+
+.btn {
+  border: 0.5px solid rgba(0,0,0,0.15);
+  background: #FFFFFF;
+  color: #111;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s, transform 0.05s;
+}
+
+.btn:hover {
+  background: rgba(0,0,0,0.03);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.btn-primary {
+  background: #1F1F1F;
+  color: white;
+  border-color: #1F1F1F;
+  font-weight: 500;
+}
+
+.btn-primary:hover {
+  background: #000;
+}
+
+.btn-add {
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px;
+  justify-content: center;
+  background: #FFFFFF;
+  border: 1px dashed rgba(0,0,0,0.2);
+}
+
+.hint {
+  margin-top: 14px;
+  background: rgba(0,0,0,0.03);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 11px;
+  color: rgba(0,0,0,0.5);
+  line-height: 1.6;
+}
+
+.card-wrap {
+  margin-bottom: 20px;
+}
+
+.card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: rgba(0,0,0,0.55);
+}
+
+.card-row .meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.card-row .actions {
+  display: flex;
+  gap: 4px;
+}
+
+.icon-btn {
+  background: transparent;
+  border: 0.5px solid rgba(0,0,0,0.12);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  color: rgba(0,0,0,0.65);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.icon-btn:hover {
+  background: rgba(0,0,0,0.04);
+}
+
+.tcard {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  aspect-ratio: 3/4;
+  width: 100%;
+  cursor: pointer;
+}
+
+.tcard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  width: 100%;
+  height: 100%;
+}
+
+.tcard-quad {
+  position: relative;
+  background: #FFFFFF;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tcard-quad img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.quad-img {
+  transform-origin: center;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  will-change: transform;
+}
+
+.quad-img.dragging {
+  cursor: grabbing;
+}
+
+.tcard-quad-empty {
+  color: rgba(0,0,0,0.25);
+  font-size: 11px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.cover-quad {
+  flex-direction: column;
+  padding: 16px 8px;
+  gap: 8px;
+  text-align: center;
+}
+
+.cover-label {
+  font-size: 17px;
+  font-weight: 500;
+  color: #111;
+  line-height: 1.4;
+}
+
+.cover-pin {
+  font-size: 13px;
+  color: #111;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.cover-pin-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #E74C3C;
+  display: inline-block;
+  position: relative;
+  top: -1px;
+}
+
+.time-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #111;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: 500;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  white-space: nowrap;
+  z-index: 5;
+  letter-spacing: 0.5px;
+}
+
+.text-tag {
+  position: absolute;
+  max-width: 88%;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: pre-line;
+  text-align: left;
+  word-break: break-word;
+  cursor: move;
+  touch-action: none;
+  user-select: none;
+  z-index: 4;
+}
+
+.text-tag.transparent {
+  padding: 2px 4px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.text-tag.dragging {
+  outline: 1px solid rgba(0,0,0,0.35);
+  outline-offset: 2px;
+}
+
+.editor {
+  background: #FFFFFF;
+  border: 0.5px solid rgba(0,0,0,0.1);
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 10px;
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.editor-title {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.editor-section {
+  margin-bottom: 14px;
+}
+
+.editor-section-title {
+  font-size: 11px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: rgba(0,0,0,0.55);
+}
+
+.quad-picker {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.quad-pick-btn {
+  border: 0.5px solid rgba(0,0,0,0.15);
+  background: white;
+  border-radius: 6px;
+  padding: 6px 4px;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-height: 48px;
+  justify-content: center;
+}
+
+.quad-pick-btn.active {
+  background: #111;
+  color: white;
+  border-color: #111;
+}
+
+.quad-pick-btn img {
+  width: 32px;
+  height: 32px;
+  border-radius: 3px;
+  object-fit: cover;
+}
+
+input[type="text"], textarea {
+  width: 100%;
+  border: 0.5px solid rgba(0,0,0,0.15);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #FFFFFF;
+  color: #111;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+input[type="text"]:focus, textarea:focus {
+  border-color: rgba(0,0,0,0.4);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 50px;
+}
+
+.swatches {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  border: 0.5px solid rgba(0,0,0,0.15);
+  flex-shrink: 0;
+}
+
+.swatch.active {
+  border: 2px solid #111;
+}
+
+.swatch.transparent {
+  background-image: repeating-linear-gradient(45deg, #eee, #eee 3px, #fff 3px, #fff 6px);
+}
+
+.row-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.row-buttons .btn {
+  flex: 1;
+  justify-content: center;
+  padding: 9px;
+  font-size: 12px;
+}
+
+.range-stack {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.range-stack label {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: rgba(0,0,0,0.55);
+}
+
+.range-stack input[type="range"] {
+  width: 100%;
+  accent-color: #111;
+}
+
+.mini-hint {
+  margin-top: 7px;
+  font-size: 11px;
+  color: rgba(0,0,0,0.45);
+  line-height: 1.5;
+}
+
+.toast {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: #1F1F1F;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+  z-index: 100;
+  max-width: 90vw;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (prefers-color-scheme: dark) {
+  html, body {
+    background: #0F0F0F;
+    color: #EEE;
+  }
+  .app {
+    background: #0F0F0F;
+  }
+  .btn, .icon-btn {
+    background: #1A1A1A;
+    border-color: rgba(255,255,255,0.12);
+    color: #EEE;
+  }
+  .btn:hover, .icon-btn:hover {
+    background: #222;
+  }
+  .btn-primary {
+    background: #FFF;
+    color: #000;
+    border-color: #FFF;
+  }
+  .btn-primary:hover {
+    background: #DDD;
+  }
+  .btn-add {
+    background: #1A1A1A;
+    border-color: rgba(255,255,255,0.2);
+  }
+  .app-header {
+    border-bottom-color: rgba(255,255,255,0.08);
+  }
+  .editor {
+    background: #1A1A1A;
+    border-color: rgba(255,255,255,0.1);
+  }
+  input[type="text"], textarea {
+    background: #1A1A1A;
+    color: #EEE;
+    border-color: rgba(255,255,255,0.15);
+  }
+  .quad-pick-btn {
+    background: #1A1A1A;
+    border-color: rgba(255,255,255,0.15);
+    color: #EEE;
+  }
+  .quad-pick-btn.active {
+    background: #FFF;
+    color: #000;
+    border-color: #FFF;
+  }
+  .swatch.active {
+    border-color: #FFF;
+  }
+  .status, .card-row, .hint, .editor-section-title, .mini-hint, .range-stack label {
+    color: rgba(255,255,255,0.5);
+  }
+  .range-stack input[type="range"] {
+    accent-color: #FFF;
+  }
+  .hint {
+    background: rgba(255,255,255,0.04);
+  }
+}
+
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="app-header">
+    <div>
+      <h1>一小时一张照片</h1>
+      <div class="status" id="status">载入中…</div>
+    </div>
+    <div class="header-actions">
+      <button id="btn-share" class="btn btn-sm">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        分享
+      </button>
+    </div>
+  </header>
+
+  <main id="cards-container"></main>
+
+  <button id="btn-add" class="btn btn-add">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    添加时间卡片
+  </button>
+
+  <div class="hint">
+    离线版数据只保存在当前浏览器;点卡片任意区域开始编辑;文字可拖动,图片可裁剪缩放。
+  </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+(function(global) {
+  'use strict';
+
+  const STORAGE_KEY = 'one-hour-photo-v3';
+
+  const LocalStorageAdapter = {
+    async get() {
+      try {
+        const v = localStorage.getItem(STORAGE_KEY);
+        return v ? JSON.parse(v) : null;
+      } catch (e) {
+        console.warn('读取失败', e);
+        return null;
+      }
+    },
+    async set(data) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        return true;
+      } catch (e) {
+        console.warn('保存失败', e);
+        return false;
+      }
+    }
+  };
+
+  const URLHashAdapter = {
+    async get() {
+      try {
+        const hash = window.location.hash;
+        if (!hash.startsWith('#data=')) return null;
+        const raw = decodeURIComponent(hash.slice(6));
+        const decompressed = decodeURIComponent(escape(atob(raw)));
+        return JSON.parse(decompressed);
+      } catch (e) {
+        return null;
+      }
+    },
+    async set(data) {
+      try {
+        const compressed = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+        const newHash = '#data=' + encodeURIComponent(compressed);
+        history.replaceState(null, '', window.location.pathname + window.location.search + newHash);
+        return true;
+      } catch (e) {
+        console.warn('URL 同步失败 (可能数据过大)', e);
+        return false;
+      }
+    }
+  };
+
+  global.Storage = {
+    LocalStorageAdapter: LocalStorageAdapter,
+    URLHashAdapter: URLHashAdapter,
+
+    async load() {
+      const fromUrl = await URLHashAdapter.get();
+      if (fromUrl) {
+        await LocalStorageAdapter.set(fromUrl);
+        return fromUrl;
+      }
+      return await LocalStorageAdapter.get();
+    },
+
+    async save(data) {
+      await LocalStorageAdapter.set(data);
+    },
+
+    async generateShareLink(data) {
+      const baseUrl = window.location.origin + window.location.pathname;
+      return baseUrl;
+    }
+  };
+
+})(window);
+
+</script>
+<script>
+(function() {
+  'use strict';
+
+  const MAX_IMG = 720;
+  const JPEG_QUALITY = 0.78;
+  const TEXT_BG_COLORS = ['#FFFFFF', '#000000', '#FBEAF0', '#E6F1FB', '#EAF3DE', '#FAEEDA', 'transparent'];
+  const TEXT_FG_COLORS = ['#111111', '#FFFFFF', '#D4537E', '#185FA5', '#3B6D11', '#854F0B'];
+
+  const POSITION_FALLBACKS = {
+    'tl': { textX: 4, textY: 4 },
+    'tr': { textX: 52, textY: 4 },
+    'bl': { textX: 4, textY: 82 },
+    'br': { textX: 52, textY: 82 }
+  };
+
+  let state = null;
+  let editing = { cardId: null, quadIdx: null };
+
+  const container = document.getElementById('cards-container');
+  const statusEl = document.getElementById('status');
+  const toast = document.getElementById('toast');
+
+  function uid() {
+    return 'c' + Math.random().toString(36).slice(2, 9);
+  }
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toast.classList.remove('show'), 1600);
+  }
+
+  function escapeHTML(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function defaultCover() {
+    return {
+      id: 'cover',
+      type: 'cover',
+      quads: [
+        { title: '体制内牛马', pin: '北京' },
+        { title: '无业游民', pin: '北京' },
+        { title: '大厂女工', pin: '北京' },
+        { title: '服装设计师', pin: '上海' }
+      ]
+    };
+  }
+
+  function defaultHour(time) {
+    return {
+      id: uid(),
+      type: 'hour',
+      time: time,
+      quads: Array.from({ length: 4 }, () => ({
+        img: null,
+        text: '',
+        textBg: '#FFFFFF',
+        textFg: '#111111',
+        textX: 4,
+        textY: 4,
+        fontSize: 11,
+        imgZoom: 1,
+        imgX: 0,
+        imgY: 0
+      }))
+    };
+  }
+
+  function defaultState() {
+    return {
+      cards: [
+        defaultCover(),
+        defaultHour('08:00'),
+        defaultHour('09:00')
+      ]
+    };
+  }
+
+  function fileToCompressedDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+          const scale = Math.min(1, MAX_IMG / Math.max(width, height));
+          width = Math.round(width * scale);
+          height = Math.round(height * scale);
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', JPEG_QUALITY));
+        };
+        img.onerror = reject;
+        img.src = reader.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function pickImage(callback) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async () => {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      try {
+        showToast('正在处理图片…');
+        const dataUrl = await fileToCompressedDataURL(file);
+        callback(dataUrl);
+      } catch (e) {
+        showToast('图片处理失败');
+      }
+    };
+    input.click();
+  }
+
+  async function loadFromStorage() {
+    const data = await window.Storage.load();
+    state = (data && Array.isArray(data.cards) && data.cards.length > 0) ? data : defaultState();
+    if (!state.cards.find(c => c.type === 'cover')) {
+      state.cards.unshift(defaultCover());
+    }
+    normalizeState();
+    render();
+    updateStatus('已载入');
+  }
+
+  function normalizeState() {
+    state.cards.forEach(card => {
+      if (!Array.isArray(card.quads)) card.quads = [];
+      while (card.quads.length < 4) card.quads.push({});
+      if (card.type !== 'hour') return;
+      card.quads.forEach(q => {
+        const fallback = POSITION_FALLBACKS[q.position] || POSITION_FALLBACKS.tl;
+        if (typeof q.textX !== 'number') q.textX = fallback.textX;
+        if (typeof q.textY !== 'number') q.textY = fallback.textY;
+        if (typeof q.fontSize !== 'number') q.fontSize = 11;
+        if (typeof q.imgZoom !== 'number') q.imgZoom = 1;
+        if (typeof q.imgX !== 'number') q.imgX = 0;
+        if (typeof q.imgY !== 'number') q.imgY = 0;
+        if (!q.textBg) q.textBg = '#FFFFFF';
+        if (!q.textFg) q.textFg = '#111111';
+      });
+    });
+  }
+
+  async function saveToStorage() {
+    await window.Storage.save(state);
+    updateStatus('已保存到本机');
+  }
+
+  function updateStatus(msg) {
+    const t = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+    statusEl.textContent = `${msg} · ${t}`;
+  }
+
+  function renderCardHTML(card) {
+    let html = '<div class="tcard-grid">';
+    for (let i = 0; i < 4; i++) {
+      const q = card.quads[i];
+      const borderRight = i % 2 === 0 ? (card.type === 'cover' ? '1px solid #111' : '1px solid white') : 'none';
+      const borderBottom = i < 2 ? (card.type === 'cover' ? '1px solid #111' : '1px solid white') : 'none';
+
+      if (card.type === 'cover') {
+        html += `<div class="tcard-quad cover-quad" data-quad="${i}" style="border-right:${borderRight}; border-bottom:${borderBottom};">
+          <div class="cover-label">${escapeHTML(q.title) || '<span style="color:rgba(0,0,0,0.25);">点击编辑</span>'}</div>
+          ${q.pin ? `<div class="cover-pin"><span class="cover-pin-dot"></span> ${escapeHTML(q.pin)}</div>` : ''}
+        </div>`;
+      } else {
+        const imgZoom = q.imgZoom || 1;
+        const imgX = q.imgX || 0;
+        const imgY = q.imgY || 0;
+        const imgHTML = q.img
+          ? `<img class="quad-img" src="${q.img}" alt="" loading="lazy" decoding="async" style="transform: translate(${imgX}%, ${imgY}%) scale(${imgZoom});">`
+          : `<div class="tcard-quad-empty">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span>点击上传</span>
+            </div>`;
+
+        let textHTML = '';
+        if (q.text) {
+          const isTransparent = q.textBg === 'transparent';
+          const bgStyle = isTransparent ? '' : `background:${q.textBg};`;
+          const textX = typeof q.textX === 'number' ? q.textX : 4;
+          const textY = typeof q.textY === 'number' ? q.textY : 4;
+          const fontSize = typeof q.fontSize === 'number' ? q.fontSize : 11;
+          textHTML = `<div class="text-tag ${isTransparent ? 'transparent' : ''}" style="left:${textX}%; top:${textY}%; font-size:${fontSize}px; ${bgStyle} color:${q.textFg};">${escapeHTML(q.text)}</div>`;
+        }
+        html += `<div class="tcard-quad" data-quad="${i}" style="border-right:${borderRight}; border-bottom:${borderBottom};">${imgHTML}${textHTML}</div>`;
+      }
+    }
+    html += '</div>';
+
+    if (card.type === 'hour') {
+      html += `<div class="time-badge">${escapeHTML(card.time)}</div>`;
+    }
+    return html;
+  }
+
+  function render() {
+    container.innerHTML = '';
+    state.cards.forEach((card) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'card-wrap';
+
+      const head = document.createElement('div');
+      head.className = 'card-row';
+      const isCover = card.type === 'cover';
+      head.innerHTML = `
+        <div class="meta">
+          ${isCover
+            ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
+            : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+          }
+          <span>${isCover ? '封面' : '时间卡 · ' + escapeHTML(card.time)}</span>
+        </div>
+        <div class="actions">
+          <button class="icon-btn" data-act="export" data-id="${card.id}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            导出
+          </button>
+          ${isCover ? '' : `<button class="icon-btn" data-act="delete" data-id="${card.id}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
+          </button>`}
+        </div>
+      `;
+      wrap.appendChild(head);
+
+      const cardEl = document.createElement('div');
+      cardEl.className = 'tcard';
+      cardEl.id = 'render-' + card.id;
+      cardEl.innerHTML = renderCardHTML(card);
+      wrap.appendChild(cardEl);
+      attachDragHandlers(cardEl, card);
+
+      if (editing.cardId === card.id) {
+        wrap.appendChild(renderEditor(card));
+      }
+
+      cardEl.addEventListener('click', (e) => {
+        const quad = e.target.closest('[data-quad]');
+        const quadIdx = quad ? parseInt(quad.dataset.quad) : 0;
+        editing = { cardId: card.id, quadIdx: quadIdx };
+        render();
+      });
+
+      head.querySelectorAll('button[data-act]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (btn.dataset.act === 'export') exportCard(card.id);
+          if (btn.dataset.act === 'delete') deleteCard(card.id);
+        });
+      });
+
+      container.appendChild(wrap);
+    });
+  }
+
+  function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function attachDragHandlers(cardEl, card) {
+    if (card.type !== 'hour') return;
+
+    cardEl.querySelectorAll('.text-tag').forEach(tag => {
+      tag.addEventListener('pointerdown', (e) => {
+        const quadEl = e.target.closest('[data-quad]');
+        const quadIdx = parseInt(quadEl.dataset.quad);
+        const q = card.quads[quadIdx];
+        editing = { cardId: card.id, quadIdx };
+
+        const quadRect = quadEl.getBoundingClientRect();
+        const tagRect = tag.getBoundingClientRect();
+        const offsetX = e.clientX - tagRect.left;
+        const offsetY = e.clientY - tagRect.top;
+
+        tag.setPointerCapture(e.pointerId);
+        tag.classList.add('dragging');
+        e.preventDefault();
+        e.stopPropagation();
+
+        const move = (ev) => {
+          const maxX = Math.max(0, ((quadRect.width - tagRect.width) / quadRect.width) * 100);
+          const maxY = Math.max(0, ((quadRect.height - tagRect.height) / quadRect.height) * 100);
+          q.textX = clamp(((ev.clientX - quadRect.left - offsetX) / quadRect.width) * 100, 0, maxX);
+          q.textY = clamp(((ev.clientY - quadRect.top - offsetY) / quadRect.height) * 100, 0, maxY);
+          tag.style.left = q.textX + '%';
+          tag.style.top = q.textY + '%';
+        };
+
+        const up = async (ev) => {
+          tag.classList.remove('dragging');
+          tag.releasePointerCapture(ev.pointerId);
+          tag.removeEventListener('pointermove', move);
+          tag.removeEventListener('pointerup', up);
+          tag.removeEventListener('pointercancel', up);
+          await saveToStorage();
+          render();
+        };
+
+        tag.addEventListener('pointermove', move);
+        tag.addEventListener('pointerup', up);
+        tag.addEventListener('pointercancel', up);
+      });
+    });
+
+    cardEl.querySelectorAll('.quad-img').forEach(img => {
+      img.addEventListener('pointerdown', (e) => {
+        const quadEl = e.target.closest('[data-quad]');
+        const quadIdx = parseInt(quadEl.dataset.quad);
+        if (editing.cardId !== card.id || editing.quadIdx !== quadIdx) return;
+        const q = card.quads[quadIdx];
+        const quadRect = quadEl.getBoundingClientRect();
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startImgX = q.imgX || 0;
+        const startImgY = q.imgY || 0;
+
+        img.setPointerCapture(e.pointerId);
+        img.classList.add('dragging');
+        e.preventDefault();
+        e.stopPropagation();
+
+        const move = (ev) => {
+          q.imgX = clamp(startImgX + ((ev.clientX - startX) / quadRect.width) * 100, -50, 50);
+          q.imgY = clamp(startImgY + ((ev.clientY - startY) / quadRect.height) * 100, -50, 50);
+          img.style.transform = `translate(${q.imgX}%, ${q.imgY}%) scale(${q.imgZoom || 1})`;
+        };
+
+        const up = async (ev) => {
+          img.classList.remove('dragging');
+          img.releasePointerCapture(ev.pointerId);
+          img.removeEventListener('pointermove', move);
+          img.removeEventListener('pointerup', up);
+          img.removeEventListener('pointercancel', up);
+          await saveToStorage();
+          render();
+        };
+
+        img.addEventListener('pointermove', move);
+        img.addEventListener('pointerup', up);
+        img.addEventListener('pointercancel', up);
+      });
+    });
+  }
+
+  function renderEditor(card) {
+    const ed = document.createElement('div');
+    ed.className = 'editor';
+    const qi = editing.quadIdx ?? 0;
+    const q = card.quads[qi];
+
+    let html = `
+      <div class="editor-header">
+        <div class="editor-title">${card.type === 'cover' ? '编辑封面' : '编辑时间卡'} · 第 ${qi + 1} 格</div>
+        <button class="icon-btn" data-ed="close">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="quad-picker">
+        ${[0, 1, 2, 3].map(i => {
+          const qq = card.quads[i];
+          let preview = '';
+          if (card.type === 'hour' && qq.img) {
+            preview = `<img src="${qq.img}" alt="">`;
+          } else if (card.type === 'cover') {
+            preview = `<span style="font-size:10px; line-height:1.2;">${escapeHTML((qq.title || '').slice(0, 4))}</span>`;
+          } else {
+            preview = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>';
+          }
+          return `<button class="quad-pick-btn ${i === qi ? 'active' : ''}" data-pick="${i}">${preview}<span>第 ${i + 1} 格</span></button>`;
+        }).join('')}
+      </div>
+    `;
+
+    if (card.type === 'cover') {
+      html += `
+        <div class="editor-section">
+          <div class="editor-section-title">职业 / 身份</div>
+          <input type="text" data-field="title" value="${escapeHTML(q.title)}" placeholder="例如:体制内牛马">
+        </div>
+        <div class="editor-section">
+          <div class="editor-section-title">坐标 / 城市</div>
+          <input type="text" data-field="pin" value="${escapeHTML(q.pin)}" placeholder="例如:北京">
+        </div>
+      `;
+    } else {
+      html += `
+        <div class="editor-section">
+          <div class="editor-section-title">时间(中间显示)</div>
+          <input type="text" data-field="time" value="${escapeHTML(card.time)}" placeholder="例如:08:00">
+        </div>
+
+        <div class="editor-section">
+          <div class="editor-section-title">图片</div>
+          <div class="row-buttons">
+            <button class="btn" data-ed="pic">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              ${q.img ? '更换' : '上传'}
+            </button>
+            ${q.img ? `<button class="btn" data-ed="pic-clear">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
+            </button>` : ''}
+          </div>
+          ${q.img ? `
+            <div class="range-stack">
+              <label>放大/缩小 <input type="range" data-field="imgZoom" min="1" max="3" step="0.05" value="${q.imgZoom || 1}"></label>
+              <label>左右裁剪 <input type="range" data-field="imgX" min="-50" max="50" step="1" value="${q.imgX || 0}"></label>
+              <label>上下裁剪 <input type="range" data-field="imgY" min="-50" max="50" step="1" value="${q.imgY || 0}"></label>
+            </div>
+            <div class="mini-hint">选中这一格后,也可以直接拖动图片调整裁剪。</div>
+          ` : ''}
+        </div>
+
+        <div class="editor-section">
+          <div class="editor-section-title">文字内容</div>
+          <textarea data-field="text" rows="2" placeholder="例如:同事发现好玩的书">${escapeHTML(q.text)}</textarea>
+        </div>
+
+        <div class="editor-section">
+          <div class="editor-section-title">文字大小</div>
+          <div class="range-stack">
+            <label><span>${q.fontSize || 11}px</span><input type="range" data-field="fontSize" min="8" max="28" step="1" value="${q.fontSize || 11}"></label>
+          </div>
+          <div class="mini-hint">文字可以直接在卡片上拖动。</div>
+        </div>
+
+        <div class="editor-section">
+          <div class="editor-section-title">文字底色</div>
+          <div class="swatches" data-swatch="bg">
+            ${TEXT_BG_COLORS.map(c => `
+              <button class="swatch ${c === 'transparent' ? 'transparent' : ''} ${q.textBg === c ? 'active' : ''}"
+                      style="${c === 'transparent' ? '' : `background:${c};`}"
+                      data-color="${c}"></button>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="editor-section">
+          <div class="editor-section-title">文字颜色</div>
+          <div class="swatches" data-swatch="fg">
+            ${TEXT_FG_COLORS.map(c => `
+              <button class="swatch ${q.textFg === c ? 'active' : ''}"
+                      style="background:${c};"
+                      data-color="${c}"></button>
+            `).join('')}
+          </div>
+        </div>
+
+      `;
+    }
+
+    html += `<button class="btn btn-primary" data-ed="save" style="width:100%; justify-content:center; margin-top:6px;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      保存
+    </button>`;
+
+    ed.innerHTML = html;
+
+    ed.querySelector('[data-ed="close"]').onclick = () => {
+      editing = { cardId: null, quadIdx: null };
+      render();
+    };
+
+    ed.querySelectorAll('[data-pick]').forEach(b => {
+      b.onclick = () => { editing.quadIdx = parseInt(b.dataset.pick); render(); };
+    });
+
+    ed.querySelectorAll('[data-field]').forEach(inp => {
+      inp.oninput = (e) => {
+        const field = inp.dataset.field;
+        if (field === 'time') {
+          card.time = e.target.value;
+        } else if (['fontSize', 'imgZoom', 'imgX', 'imgY'].includes(field)) {
+          card.quads[qi][field] = parseFloat(e.target.value);
+          if (field === 'fontSize') {
+            const span = inp.closest('label').querySelector('span');
+            if (span) span.textContent = e.target.value + 'px';
+          }
+        } else {
+          card.quads[qi][field] = e.target.value;
+        }
+        updateCardDOM(card);
+      };
+    });
+
+    const picBtn = ed.querySelector('[data-ed="pic"]');
+    if (picBtn) picBtn.onclick = () => pickImage(async (dataUrl) => {
+      try {
+        card.quads[qi].img = dataUrl;
+        card.quads[qi].imgZoom = 1;
+        card.quads[qi].imgX = 0;
+        card.quads[qi].imgY = 0;
+        render();
+        showToast('图片已加入,记得保存');
+      } catch (e) {
+        console.error(e);
+        showToast('图片处理失败');
+      }
+    });
+
+    const picClear = ed.querySelector('[data-ed="pic-clear"]');
+    if (picClear) picClear.onclick = () => {
+      card.quads[qi].img = null;
+      render();
+    };
+
+    ed.querySelectorAll('[data-swatch="bg"] .swatch').forEach(s => {
+      s.onclick = () => { card.quads[qi].textBg = s.dataset.color; render(); };
+    });
+    ed.querySelectorAll('[data-swatch="fg"] .swatch').forEach(s => {
+      s.onclick = () => { card.quads[qi].textFg = s.dataset.color; render(); };
+    });
+    ed.querySelector('[data-ed="save"]').onclick = async () => {
+      await saveToStorage();
+      editing = { cardId: null, quadIdx: null };
+      render();
+      showToast('已保存');
+    };
+
+    return ed;
+  }
+
+  function updateCardDOM(card) {
+    const el = document.getElementById('render-' + card.id);
+    if (el) {
+      el.innerHTML = renderCardHTML(card);
+      attachDragHandlers(el, card);
+    }
+  }
+
+  async function exportCard(id) {
+    const el = document.getElementById('render-' + id);
+    if (!el) return;
+    showToast('生成图片中…');
+    try {
+      const canvas = await html2canvas(el, {
+        backgroundColor: '#FFFFFF',
+        scale: 2,
+        useCORS: true,
+        logging: false
+      });
+      const link = document.createElement('a');
+      const card = state.cards.find(c => c.id === id);
+      const name = card.type === 'cover' ? 'cover' : 'time-' + (card.time || 'card').replace(':', '');
+      link.download = `${name}-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      showToast('已导出到下载文件夹');
+    } catch (e) {
+      console.error(e);
+      showToast('导出失败,请重试');
+    }
+  }
+
+  async function deleteCard(id) {
+    if (!confirm('删除这张时间卡片?')) return;
+    state.cards = state.cards.filter(c => c.id !== id);
+    editing = { cardId: null, quadIdx: null };
+    render();
+    await saveToStorage();
+  }
+
+  function nextHour(time) {
+    const m = /^(\d{1,2}):(\d{2})$/.exec(time);
+    if (!m) return '10:00';
+    const h = (parseInt(m[1]) + 1) % 24;
+    return String(h).padStart(2, '0') + ':' + m[2];
+  }
+
+  document.getElementById('btn-add').onclick = async () => {
+    const last = [...state.cards].reverse().find(c => c.type === 'hour');
+    const time = last ? nextHour(last.time) : '08:00';
+    state.cards.push(defaultHour(time));
+    render();
+    await saveToStorage();
+    container.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  document.getElementById('btn-share').onclick = async () => {
+    const link = await window.Storage.generateShareLink(state);
+    try {
+      await navigator.clipboard.writeText(link);
+      showToast('分享链接已复制');
+    } catch (e) {
+      prompt('复制下面这个链接发给对方:', link);
+    }
+  };
+
+  loadFromStorage();
+
+})();
+
+</script>
+</body>
+</html>
