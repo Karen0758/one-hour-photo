@@ -20,49 +20,6 @@ html, body {
   padding: 16px;
   min-height: 100vh;
   background: #FAFAFA;
-  display: none;
-}
-
-body.room-ready .app {
-  display: block;
-}
-
-.room-gate {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 20px;
-  background: #FAFAFA;
-}
-
-body.room-ready .room-gate {
-  display: none;
-}
-
-.room-panel {
-  width: min(100%, 360px);
-  background: #FFFFFF;
-  border: 0.5px solid rgba(0,0,0,0.1);
-  border-radius: 10px;
-  padding: 22px;
-}
-
-.room-panel h1 {
-  font-size: 20px;
-  font-weight: 500;
-  margin-bottom: 8px;
-}
-
-.room-panel p {
-  font-size: 13px;
-  color: rgba(0,0,0,0.55);
-  margin-bottom: 16px;
-}
-
-.room-panel form {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
 }
 
 .app-header {
@@ -500,16 +457,6 @@ textarea {
   }
   .app {
     background: #0F0F0F;
-  }
-  .room-gate {
-    background: #0F0F0F;
-  }
-  .room-panel {
-    background: #1A1A1A;
-    border-color: rgba(255,255,255,0.1);
-  }
-  .room-panel p {
-    color: rgba(255,255,255,0.5);
   }
   .btn, .icon-btn {
     background: #1A1A1A;

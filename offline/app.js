@@ -15,16 +15,10 @@
 
   let state = null;
   let editing = { cardId: null, quadIdx: null };
-  let roomCode = null;
-  let remoteUpdatedAt = null;
-  let syncTimer = null;
 
   const container = document.getElementById('cards-container');
   const statusEl = document.getElementById('status');
   const toast = document.getElementById('toast');
-  const roomGate = document.getElementById('room-gate');
-  const roomForm = document.getElementById('room-form');
-  const roomInput = document.getElementById('room-code');
 
   function uid() {
     return 'c' + Math.random().toString(36).slice(2, 9);
@@ -130,71 +124,7 @@
     input.click();
   }
 
-  function getInitialRoomCode() {
-    const params = new URLSearchParams(window.location.search);
-    const fromUrl = params.get('room');
-    if (/^\d{4}$/.test(fromUrl || '')) return fromUrl;
-    return '';
-  }
-
-  function setRoomInUrl(code) {
-    const url = new URL(window.location.href);
-    url.searchParams.set('room', code);
-    history.replaceState(null, '', url.pathname + url.search + url.hash);
-  }
-
-  async function enterRoom(code) {
-    if (!/^\d{4}$/.test(code)) {
-      showToast('请输入 4 位数字房间号');
-      return;
-    }
-
-    roomCode = code;
-    setRoomInUrl(code);
-    document.body.classList.add('room-ready');
-    await loadRoomState();
-
-    clearInterval(syncTimer);
-    syncTimer = setInterval(() => {
-      if (!editing.cardId) loadRoomState({ silent: true });
-    }, 5000);
-  }
-
-  async function loadRoomState(options = {}) {
-    if (!roomCode) return;
-    try {
-      if (!options.silent) updateStatus(`正在进入房间 ${roomCode}`);
-      const res = await fetch(`/.netlify/functions/room?code=${encodeURIComponent(roomCode)}`, { cache: 'no-store' });
-      if (!res.ok) throw new Error('room load failed');
-      const data = await res.json();
-
-      state = data.state && Array.isArray(data.state.cards) ? data.state : defaultState();
-      remoteUpdatedAt = data.updated_at || null;
-      if (!state.cards.find(c => c.type === 'cover')) state.cards.unshift(defaultCover());
-      normalizeState();
-      render();
-      updateStatus(options.silent ? `房间 ${roomCode} 已同步` : `已进入房间 ${roomCode}`);
-    } catch (e) {
-      console.warn(e);
-      const local = await window.Storage.load();
-      state = local && Array.isArray(local.cards) ? local : defaultState();
-      normalizeState();
-      render();
-      updateStatus(`房间 ${roomCode} 离线编辑中`);
-      showToast('线上同步失败,先使用本地数据');
-    }
-  }
-
-  async function uploadRoomImage(dataUrl) {
-    return dataUrl;
-  }
-
   async function loadFromStorage() {
-    document.body.classList.add('room-ready');
-    await loadFromStorageLegacy();
-  }
-
-  async function loadFromStorageLegacy() {
     const data = await window.Storage.load();
     state = (data && Array.isArray(data.cards) && data.cards.length > 0) ? data : defaultState();
     if (!state.cards.find(c => c.type === 'cover')) {
@@ -203,21 +133,6 @@
     normalizeState();
     render();
     updateStatus('已载入');
-  }
-
-  async function loadRemoteCards(options = {}) {
-    try {
-      const res = await fetch('/.netlify/functions/cards', { cache: 'no-store' });
-      if (!res.ok) return;
-      const data = await res.json();
-      if (!data || !Array.isArray(data.cards) || data.cards.length < 2) return;
-      state = data;
-      normalizeState();
-      render();
-      if (!options.silent) updateStatus('已同步线上数据');
-    } catch (e) {
-      if (!options.silent) console.warn('线上数据同步失败', e);
-    }
   }
 
   function normalizeState() {
@@ -241,26 +156,7 @@
 
   async function saveToStorage() {
     await window.Storage.save(state);
-    if (!roomCode) {
-      updateStatus('已保存到本机');
-      return;
-    }
-
-    try {
-      const res = await fetch('/.netlify/functions/room', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ code: roomCode, state })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'save failed');
-      remoteUpdatedAt = data.updated_at || remoteUpdatedAt;
-      updateStatus(`房间 ${roomCode} 已保存`);
-    } catch (e) {
-      console.warn(e);
-      updateStatus(`房间 ${roomCode} 保存失败`);
-      showToast('线上保存失败,请稍后再试');
-    }
+    updateStatus('已保存到本机');
   }
 
   function updateStatus(msg) {
@@ -603,17 +499,15 @@
     const picBtn = ed.querySelector('[data-ed="pic"]');
     if (picBtn) picBtn.onclick = () => pickImage(async (dataUrl) => {
       try {
-        showToast('正在上传图片…');
-        const url = await uploadRoomImage(dataUrl);
-        card.quads[qi].img = url;
+        card.quads[qi].img = dataUrl;
         card.quads[qi].imgZoom = 1;
         card.quads[qi].imgX = 0;
         card.quads[qi].imgY = 0;
         render();
-        showToast('图片已上传,记得保存');
+        showToast('图片已加入,记得保存');
       } catch (e) {
         console.error(e);
-        showToast('图片上传失败');
+        showToast('图片处理失败');
       }
     });
 
@@ -696,9 +590,7 @@
   };
 
   document.getElementById('btn-share').onclick = async () => {
-    const link = roomCode
-      ? `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(roomCode)}`
-      : await window.Storage.generateShareLink(state);
+    const link = await window.Storage.generateShareLink(state);
     try {
       await navigator.clipboard.writeText(link);
       showToast('分享链接已复制');
@@ -706,15 +598,6 @@
       prompt('复制下面这个链接发给对方:', link);
     }
   };
-
-  const roomButton = document.getElementById('btn-room');
-  if (roomButton) roomButton.style.display = 'none';
-
-  if (roomForm) {
-    roomForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-    });
-  }
 
   loadFromStorage();
 
