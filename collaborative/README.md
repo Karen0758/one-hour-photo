@@ -67,6 +67,7 @@ one-hour-photo/
 - `/.netlify/functions/room?code=1024`:读取房间状态
 - `/.netlify/functions/room`:保存房间状态
 - `/.netlify/functions/upload`:上传房间图片到 Supabase Storage
+- `/.netlify/functions/clear-room`:用管理员密码清空房间状态和图片
 
 需要在 Supabase SQL Editor 重新执行 `supabase/schema.sql`,以创建 `room_states` 表。
 
@@ -79,9 +80,10 @@ SUPABASE_URL=你的 Supabase Project URL
 SUPABASE_PUBLISHABLE_KEY=你的 Supabase publishable key
 SUPABASE_SERVICE_ROLE_KEY=你的 Supabase service_role key
 SUPABASE_BUCKET=one-hour-photo
+ADMIN_TOKEN=你的管理员密码
 ```
 
-`SUPABASE_SERVICE_ROLE_KEY` 只能放在 Netlify 环境变量里,不要写进前端文件。房间保存和图片上传会通过 Netlify Functions 完成。
+`SUPABASE_SERVICE_ROLE_KEY` 和 `ADMIN_TOKEN` 只能放在 Netlify 环境变量里,不要写进前端文件。房间保存、图片上传和清空房间会通过 Netlify Functions 完成。
 
 ### Supabase 设置
 

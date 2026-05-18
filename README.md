@@ -47,6 +47,7 @@ SUPABASE_URL=
 SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 SUPABASE_BUCKET=one-hour-photo
+ADMIN_TOKEN=用于清空房间的管理员密码
 ```
 
 4. 部署 `collaborative/` 目录到 Netlify。

@@ -721,6 +721,39 @@
     }
   };
 
+  document.getElementById('btn-clear-room').onclick = async () => {
+    if (!roomCode) {
+      showToast('请先进入房间');
+      return;
+    }
+
+    const token = prompt(`输入管理员密码以清空房间 ${roomCode}`);
+    if (token == null) return;
+    if (!confirm(`确认清空房间 ${roomCode}? 这个操作会删除房间状态和已上传图片。`)) return;
+
+    try {
+      showToast('正在清空房间…');
+      const res = await fetch('/.netlify/functions/clear-room', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ code: roomCode, adminToken: token })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'clear failed');
+
+      state = defaultState();
+      remoteUpdatedAt = null;
+      editing = { cardId: null, quadIdx: null };
+      normalizeState();
+      render();
+      updateStatus(`房间 ${roomCode} 已清空`);
+      showToast(`已清空,删除 ${data.deletedImages || 0} 张图片`);
+    } catch (e) {
+      console.error(e);
+      showToast(e.message || '清空失败');
+    }
+  };
+
   document.getElementById('btn-room').onclick = () => {
     roomCode = null;
     editing = { cardId: null, quadIdx: null };
