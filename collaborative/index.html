@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#FFFFFF">
+<title>一小时一张照片</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+<div class="room-gate" id="room-gate">
+  <div class="room-panel">
+    <h1>进入照片房间</h1>
+    <p>输入 4 位房间号,同一个房间的人会看到并编辑同一份卡片。</p>
+    <form id="room-form">
+      <input id="room-code" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="例如 1024" autocomplete="off">
+      <button class="btn btn-primary" type="submit">进入</button>
+    </form>
+  </div>
+</div>
+
+<div class="app">
+
+  <header class="app-header">
+    <div>
+      <h1>一小时一张照片</h1>
+      <div class="status" id="status">请输入房间号</div>
+    </div>
+    <div class="header-actions">
+      <button id="btn-share" class="btn btn-sm">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        分享
+      </button>
+      <button id="btn-room" class="btn btn-sm">房间</button>
+    </div>
+  </header>
+
+  <main id="cards-container"></main>
+
+  <button id="btn-add" class="btn btn-add">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    添加时间卡片
+  </button>
+
+  <div class="hint">
+    同一房间号会同步同一份卡片;点卡片任意区域开始编辑;文字可拖动,图片可裁剪缩放。
+  </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="storage.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

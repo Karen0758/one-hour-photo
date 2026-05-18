@@ -1,0 +1,11 @@
+{
+  "name": "one-hour-photo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node -e \"console.log('static site')\""
+  },
+  "dependencies": {
+    "jimp": "^0.22.12"
+  }
+}
