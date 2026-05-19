@@ -18,6 +18,7 @@
   let roomCode = null;
   let remoteUpdatedAt = null;
   let syncTimer = null;
+  let autosaveTimer = null;
 
   const container = document.getElementById('cards-container');
   const statusEl = document.getElementById('status');
@@ -254,6 +255,7 @@
   }
 
   async function saveToStorage() {
+    clearTimeout(autosaveTimer);
     await window.Storage.save(state);
     if (!roomCode) {
       updateStatus('已保存到本机');
@@ -275,6 +277,14 @@
       updateStatus(`房间 ${roomCode} 保存失败`);
       showToast('线上保存失败,请稍后再试');
     }
+  }
+
+  function scheduleAutoSave() {
+    clearTimeout(autosaveTimer);
+    updateStatus('有未保存修改');
+    autosaveTimer = setTimeout(async () => {
+      await saveToStorage();
+    }, 900);
   }
 
   function updateStatus(msg) {
@@ -619,6 +629,7 @@
           card.quads[qi][field] = e.target.value;
         }
         updateCardDOM(card);
+        scheduleAutoSave();
       };
     });
 
@@ -632,7 +643,8 @@
         card.quads[qi].imgX = 0;
         card.quads[qi].imgY = 0;
         render();
-        showToast('图片已上传,记得保存');
+        await saveToStorage();
+        showToast('图片已上传并保存');
       } catch (e) {
         console.error(e);
         showToast('图片上传失败');
@@ -643,13 +655,14 @@
     if (picClear) picClear.onclick = () => {
       card.quads[qi].img = null;
       render();
+      scheduleAutoSave();
     };
 
     ed.querySelectorAll('[data-swatch="bg"] .swatch').forEach(s => {
-      s.onclick = () => { card.quads[qi].textBg = s.dataset.color; render(); };
+      s.onclick = () => { card.quads[qi].textBg = s.dataset.color; render(); scheduleAutoSave(); };
     });
     ed.querySelectorAll('[data-swatch="fg"] .swatch').forEach(s => {
-      s.onclick = () => { card.quads[qi].textFg = s.dataset.color; render(); };
+      s.onclick = () => { card.quads[qi].textFg = s.dataset.color; render(); scheduleAutoSave(); };
     });
     ed.querySelector('[data-ed="save"]').onclick = async () => {
       await saveToStorage();
