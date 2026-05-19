@@ -863,6 +863,12 @@ textarea {
           <span>${isCover ? '封面' : '时间卡 · ' + escapeHTML(card.time)}</span>
         </div>
         <div class="actions">
+          ${isCover ? '' : `<button class="icon-btn" data-act="move-up" data-id="${card.id}" title="上移">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+          </button>
+          <button class="icon-btn" data-act="move-down" data-id="${card.id}" title="下移">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>`}
           <button class="icon-btn" data-act="export" data-id="${card.id}">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             导出
@@ -897,6 +903,8 @@ textarea {
           e.stopPropagation();
           if (btn.dataset.act === 'export') exportCard(card.id);
           if (btn.dataset.act === 'delete') deleteCard(card.id);
+          if (btn.dataset.act === 'move-up') moveCard(card.id, -1);
+          if (btn.dataset.act === 'move-down') moveCard(card.id, 1);
         });
       });
 
@@ -1206,6 +1214,22 @@ textarea {
   async function deleteCard(id) {
     if (!confirm('删除这张时间卡片?')) return;
     state.cards = state.cards.filter(c => c.id !== id);
+    editing = { cardId: null, quadIdx: null };
+    render();
+    await saveToStorage();
+  }
+
+  async function moveCard(id, direction) {
+    const index = state.cards.findIndex(c => c.id === id);
+    if (index < 0 || state.cards[index].type === 'cover') return;
+    const target = index + direction;
+    if (target < 1 || target >= state.cards.length) {
+      showToast(direction < 0 ? '已经是第一张时间卡' : '已经是最后一张时间卡');
+      return;
+    }
+
+    const [card] = state.cards.splice(index, 1);
+    state.cards.splice(target, 0, card);
     editing = { cardId: null, quadIdx: null };
     render();
     await saveToStorage();
